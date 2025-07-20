@@ -29,11 +29,9 @@ jobs:
       - name: Check for merge conflicts
         run: |
           cd base
-          git config --global user.email "ci@example.com"
-          git config --global user.name "GitHub Action"
           git remote add pr ../pr
           git fetch pr
-          git merge FETCH_HEAD --no-commit --no-ff || (echo "❌ Merge conflict detected!" && exit 1)
+          git merge pr/${{ github.head_ref }} --no-commit --no-ff || (echo "❌ Merge conflict detected!" && exit 1)
 
   build-and-test:
     name: Build & Test Notebooks
@@ -42,31 +40,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Miniconda if not found
-        run: |
-          if ! command -v conda &> /dev/null; then
-            echo "⚠️ Conda not found. Installing Miniconda..."
-            wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-            bash miniconda.sh -b -p $HOME/miniconda
-            echo "$HOME/miniconda/bin" >> $GITHUB_PATH
-          else
-            echo "✅ Conda already installed."
-          fi
-
-      - name: Set up Conda environment
-        run: |
-          source $HOME/miniconda/bin/activate
-          conda env create -f environment.yml || echo "Environment already exists."
-          conda activate quantum-ml
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          environment-file: environment.yml
+          activate-environment: quantum-ml
+          python-version: "3.9"
 
       - name: Install extras
         run: |
-          source $HOME/miniconda/bin/activate quantum-ml
+          conda activate quantum-ml
           pip install papermill nbconvert
 
-      - name: Run notebooks
+      - name: Run notebooks with papermill
         run: |
-          source $HOME/miniconda/bin/activate quantum-ml
+          conda activate quantum-ml
           mkdir -p artifacts
           for nb in notebooks/*.ipynb; do
             papermill "$nb" "artifacts/$(basename "$nb")"
@@ -74,7 +63,7 @@ jobs:
 
       - name: Convert notebooks to HTML
         run: |
-          source $HOME/miniconda/bin/activate quantum-ml
+          conda activate quantum-ml
           mkdir -p artifacts_html
           jupyter nbconvert --to html artifacts/*.ipynb --output-dir artifacts_html
 
