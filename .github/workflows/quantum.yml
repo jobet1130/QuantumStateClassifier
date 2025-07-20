@@ -107,7 +107,7 @@ jobs:
           path: public
 
       - name: Deploy to GitHub Pages
-        if: steps.check-artifact.outputs.found == 'true'
+        if: steps.check-artifact.outputs.found == 'true' && github.ref == 'refs/heads/master'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
