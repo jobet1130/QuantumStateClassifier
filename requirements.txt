@@ -1,5 +1,5 @@
 # Core Python Libraries
-numpy==1.26.4
+numpy==2.3.1
 scipy==1.13.1
 pandas==2.2.2
 matplotlib==3.8.4
@@ -7,30 +7,30 @@ seaborn==0.13.2
 
 # Machine Learning
 scikit-learn==1.5.0
-xgboost==2.0.3
-lightgbm==4.3.0
+xgboost==3.0.2
+lightgbm==4.6.0
 
 # Model Interpretability
-shap==0.44.1
+shap==0.48.0
 lime==0.2.0.1
 
 # Hyperparameter Tuning
-optuna==3.6.1
+optuna==4.4.0
 
 # Quantum Computing
-qiskit==1.0.2
-qiskit-machine-learning==0.7.0
+qiskit==2.1.1
+qiskit-machine-learning==0.8.3
 
 # Notebook & Visualization
 jupyterlab==4.2.1
 ipykernel==6.29.4
-plotly==5.22.0
+plotly==6.2.0
 
 # Deployment (Optional)
 flask==3.0.3
 joblib==1.4.2
-fastapi==0.111.0
-uvicorn==0.30.1
+fastapi==0.116.0.0
+uvicorn==0.35.0.11
 
 # Other
 tqdm==4.66.4
