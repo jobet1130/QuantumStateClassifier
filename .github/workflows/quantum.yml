@@ -2,11 +2,9 @@ name: Quantum ML CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - '**'
+    branches: ['**']
   pull_request:
-    branches:
-      - '**'
+    branches: ['**']
 
 jobs:
   check-merge-conflicts:
@@ -14,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - name: Checkout base branch (target)
+      - name: Checkout base branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.base_ref }}
           path: base
           fetch-depth: 0
 
-      - name: Checkout head branch (PR)
+      - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
@@ -30,53 +28,45 @@ jobs:
 
       - name: Check for merge conflicts
         run: |
+          cd base
           git config --global user.email "ci@example.com"
           git config --global user.name "GitHub Action"
-          
-          cd base
           git remote add pr ../pr
           git fetch pr
-
-          # Attempt the merge
-          git merge FETCH_HEAD --no-commit --no-ff || (
-            echo "❌ Merge conflict detected!" && exit 1
-          )
+          git merge FETCH_HEAD --no-commit --no-ff || (echo "❌ Merge conflict detected!" && exit 1)
 
   build-and-test:
     name: Build & Test Notebooks
     runs-on: ubuntu-latest
     needs: check-merge-conflicts
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
+          auto-update-conda: true
           activate-environment: quantum-ml
           environment-file: environment.yml
           python-version: 3.10
-          auto-activate-base: false
+          use-mamba: true
 
-      - name: Install notebook tools
+      - name: Install extras
+        shell: bash -l {0}
         run: |
-          source ~/.bashrc
-          conda activate quantum-ml
           pip install papermill nbconvert
 
-      - name: Execute Notebooks
+      - name: Run notebooks
+        shell: bash -l {0}
         run: |
-          source ~/.bashrc
-          conda activate quantum-ml
           mkdir -p artifacts
           for nb in notebooks/*.ipynb; do
             papermill "$nb" "artifacts/$(basename "$nb")"
           done
 
-      - name: Convert Notebooks to HTML
+      - name: Convert notebooks to HTML
+        shell: bash -l {0}
         run: |
-          source ~/.bashrc
-          conda activate quantum-ml
           mkdir -p artifacts_html
           jupyter nbconvert --to html artifacts/*.ipynb --output-dir artifacts_html
 
@@ -92,10 +82,9 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Download HTML Artifacts
+      - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
           name: html-reports
