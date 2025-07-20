@@ -14,14 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - name: Checkout target branch
+      - name: Checkout base branch (target)
         uses: actions/checkout@v4
         with:
           ref: ${{ github.base_ref }}
           path: base
           fetch-depth: 0
 
-      - name: Checkout PR branch
+      - name: Checkout head branch (PR)
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
@@ -30,12 +30,17 @@ jobs:
 
       - name: Check for merge conflicts
         run: |
-          cd base
           git config --global user.email "ci@example.com"
           git config --global user.name "GitHub Action"
+          
+          cd base
           git remote add pr ../pr
           git fetch pr
-          git merge pr/main --no-commit --no-ff || (echo "❌ Merge conflict detected!" && exit 1)
+
+          # Attempt the merge
+          git merge FETCH_HEAD --no-commit --no-ff || (
+            echo "❌ Merge conflict detected!" && exit 1
+          )
 
   build-and-test:
     name: Build & Test Notebooks
@@ -51,14 +56,17 @@ jobs:
           activate-environment: quantum-ml
           environment-file: environment.yml
           python-version: 3.10
+          auto-activate-base: false
 
-      - name: Install extras
+      - name: Install notebook tools
         run: |
+          source ~/.bashrc
           conda activate quantum-ml
           pip install papermill nbconvert
 
-      - name: Run Notebooks
+      - name: Execute Notebooks
         run: |
+          source ~/.bashrc
           conda activate quantum-ml
           mkdir -p artifacts
           for nb in notebooks/*.ipynb; do
@@ -67,6 +75,7 @@ jobs:
 
       - name: Convert Notebooks to HTML
         run: |
+          source ~/.bashrc
           conda activate quantum-ml
           mkdir -p artifacts_html
           jupyter nbconvert --to html artifacts/*.ipynb --output-dir artifacts_html
@@ -83,10 +92,10 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout main branch
         uses: actions/checkout@v4
 
-      - name: Download Artifacts
+      - name: Download HTML Artifacts
         uses: actions/download-artifact@v4
         with:
           name: html-reports
