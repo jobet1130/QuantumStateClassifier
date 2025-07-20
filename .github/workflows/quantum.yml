@@ -3,12 +3,10 @@ name: Quantum ML CI/CD Pipeline
 on:
   push:
     branches:
-      - "**"
+      - '**'
   pull_request:
     branches:
-      - "**"
-  merge_group:
-    types: [checks_requested]
+      - '**'
 
 jobs:
   check-conflicts:
@@ -16,18 +14,16 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Check for Merge Conflicts
-        uses: devmasx/merge-conflict-check-action@v2
+      - name: Check merge conflicts
+        uses: tzkhan/pr-merge-conflict-action@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          fail-on-conflict: true
 
   build-and-test:
     name: Build & Test Notebooks
     runs-on: ubuntu-latest
-    needs: [check-conflicts]
+    needs: check-conflicts
 
     steps:
       - name: Checkout repository
@@ -41,23 +37,23 @@ jobs:
           environment-file: environment.yml
           python-version: 3.10
 
-      - name: Install extra tools
+      - name: Install additional pip packages
+        shell: bash -l {0}
         run: |
-          conda activate quantum-ml
           pip install papermill nbconvert
 
       - name: Run notebooks with Papermill
+        shell: bash -l {0}
         run: |
-          conda activate quantum-ml
           mkdir -p artifacts
           for nb in notebooks/*.ipynb; do
-            echo "Running $nb..."
+            echo "Running $nb"
             papermill "$nb" "artifacts/$(basename "$nb")"
           done
 
       - name: Convert notebooks to HTML
+        shell: bash -l {0}
         run: |
-          conda activate quantum-ml
           mkdir -p artifacts_html
           jupyter nbconvert --to html artifacts/*.ipynb --output-dir artifacts_html
 
@@ -69,8 +65,8 @@ jobs:
 
   deploy:
     name: Deploy to GitHub Pages
-    needs: build-and-test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build-and-test
     runs-on: ubuntu-latest
 
     steps:
