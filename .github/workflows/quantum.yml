@@ -26,12 +26,19 @@ jobs:
           path: pr
           fetch-depth: 0
 
+      - name: Configure Git identity
+        run: |
+          git config --global user.email "jcasquejo56@gmail.com"
+          git config --global user.name "jobet1130"
+
       - name: Check for merge conflicts
         run: |
           cd base
           git remote add pr ../pr
           git fetch pr
-          git merge pr/${{ github.head_ref }} --no-commit --no-ff || (echo "❌ Merge conflict detected!" && exit 1)
+          git merge FETCH_HEAD --no-commit --no-ff || (echo "❌ Merge conflict detected!" && exit 1)
+
+
 
   build-and-test:
     name: Build & Test Notebooks
