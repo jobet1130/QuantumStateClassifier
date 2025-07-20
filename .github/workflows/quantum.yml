@@ -1,0 +1,90 @@
+name: Quantum ML CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+  merge_group:
+    types: [checks_requested]
+
+jobs:
+  check-conflicts:
+    name: Prevent Merge Conflicts
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for Merge Conflicts
+        uses: devmasx/merge-conflict-check-action@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-and-test:
+    name: Build & Test Notebooks
+    runs-on: ubuntu-latest
+    needs: [check-conflicts]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: false
+          activate-environment: quantum-ml
+          environment-file: environment.yml
+          python-version: 3.10
+
+      - name: Install extra tools
+        run: |
+          conda activate quantum-ml
+          pip install papermill nbconvert
+
+      - name: Run notebooks with Papermill
+        run: |
+          conda activate quantum-ml
+          mkdir -p artifacts
+          for nb in notebooks/*.ipynb; do
+            echo "Running $nb..."
+            papermill "$nb" "artifacts/$(basename "$nb")"
+          done
+
+      - name: Convert notebooks to HTML
+        run: |
+          conda activate quantum-ml
+          mkdir -p artifacts_html
+          jupyter nbconvert --to html artifacts/*.ipynb --output-dir artifacts_html
+
+      - name: Upload HTML artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-reports
+          path: artifacts_html/
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download HTML artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: html-reports
+          path: public/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
