@@ -62,10 +62,14 @@ jobs:
 
       - name: Run notebooks with papermill
         run: |
-          mkdir -p artifacts
-          for nb in notebooks/*.ipynb; do
-            conda run -n quantum-ml papermill "$nb" "artifacts/$(basename "$nb")"
-          done
+          if ls notebooks/*.ipynb 1> /dev/null 2>&1; then
+            mkdir -p artifacts
+            for nb in notebooks/*.ipynb; do
+              conda run -n quantum-ml papermill "$nb" "artifacts/$(basename "$nb")"
+            done
+          else
+            echo "⚠️ No notebooks found in the notebooks/ directory."
+          fi
 
       - name: Convert notebooks to HTML
         run: |
