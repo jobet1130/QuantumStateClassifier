@@ -42,31 +42,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          auto-update-conda: true
-          activate-environment: quantum-ml
-          environment-file: environment.yml
-          python-version: 3.10
-          use-mamba: true
+      - name: Install Miniconda if not found
+        run: |
+          if ! command -v conda &> /dev/null; then
+            echo "⚠️ Conda not found. Installing Miniconda..."
+            wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+            bash miniconda.sh -b -p $HOME/miniconda
+            echo "$HOME/miniconda/bin" >> $GITHUB_PATH
+          else
+            echo "✅ Conda already installed."
+          fi
+
+      - name: Set up Conda environment
+        run: |
+          source $HOME/miniconda/bin/activate
+          conda env create -f environment.yml || echo "Environment already exists."
+          conda activate quantum-ml
 
       - name: Install extras
-        shell: bash -l {0}
         run: |
+          source $HOME/miniconda/bin/activate quantum-ml
           pip install papermill nbconvert
 
       - name: Run notebooks
-        shell: bash -l {0}
         run: |
+          source $HOME/miniconda/bin/activate quantum-ml
           mkdir -p artifacts
           for nb in notebooks/*.ipynb; do
             papermill "$nb" "artifacts/$(basename "$nb")"
           done
 
       - name: Convert notebooks to HTML
-        shell: bash -l {0}
         run: |
+          source $HOME/miniconda/bin/activate quantum-ml
           mkdir -p artifacts_html
           jupyter nbconvert --to html artifacts/*.ipynb --output-dir artifacts_html
 
