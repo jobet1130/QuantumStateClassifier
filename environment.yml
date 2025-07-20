@@ -19,9 +19,11 @@ dependencies:
   - plotly
   - jupyterlab
   - notebook
+  - missingno
 
   - pip:
       - qiskit
       - ipywidgets
       - tqdm
       - kaleido
+  
