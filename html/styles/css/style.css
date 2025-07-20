@@ -1,0 +1,45 @@
+/* Light Theme (default) */
+body {
+  --bg: #ffffff;
+  --text: #000000;
+  --link: #007acc;
+  --header: #333333;
+  --code-bg: #f4f4f4;
+  --pre-bg: #efefef;
+  --pre-text: #000000;
+
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header, footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: var(--code-bg);
+}
+
+h1, h2 {
+  color: var(--header);
+}
+
+a {
+  color: var(--link);
+}
+
+pre {
+  background-color: var(--pre-bg);
+  color: var(--pre-text);
+  padding: 1rem;
+  overflow-x: auto;
+  border-radius: 5px;
+}
+
+button {
+  display: block;
+  margin: 2rem auto;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+}
