@@ -10,7 +10,6 @@ jobs:
   check-merge-conflicts:
     name: Check Merge Conflicts
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout base branch
         uses: actions/checkout@v4
@@ -55,8 +54,7 @@ jobs:
 
       - name: Install extras
         run: |
-          conda run -n quantum-ml
-          pip install papermill nbconvert
+          conda run -n quantum-ml pip install papermill nbconvert
 
       - name: Run notebooks with papermill
         run: |
@@ -89,7 +87,6 @@ jobs:
     name: Deploy to GitHub Pages
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     steps:
       - uses: actions/checkout@v4
 
@@ -115,3 +112,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
+
