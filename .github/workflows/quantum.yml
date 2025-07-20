@@ -97,7 +97,7 @@ jobs:
           response=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts)
           echo "$response" | jq -r '.artifacts[].name' | grep -q '^html-reports$' && echo "found=true" >> $GITHUB_OUTPUT || echo "found=false" >> $GITHUB_OUTPUT
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Download Artifacts
         if: steps.check-artifact.outputs.found == 'true'
@@ -107,9 +107,9 @@ jobs:
           path: public
 
       - name: Deploy to GitHub Pages
-        if: steps.check-artifact.outputs.found == 'true'
+        if: steps.check-artifact.outputs.found == 'true' && github.ref == 'refs/heads/master'
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GH_PAT }}
           publish_dir: ./public
 
