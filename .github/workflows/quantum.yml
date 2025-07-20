@@ -19,12 +19,14 @@ jobs:
         with:
           ref: ${{ github.base_ref }}
           path: base
+          fetch-depth: 0
 
       - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
           path: pr
+          fetch-depth: 0
 
       - name: Check for merge conflicts
         run: |
