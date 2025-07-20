@@ -1,0 +1,89 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# Environment files
+.env
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+env.yaml
+
+# Conda environment file (generated)
+*.conda
+*.yml
+
+# Python virtual environment
+*.egg-info/
+.eggs/
+*.egg
+*.whl
+
+# Log files
+*.log
+
+# VSCode settings
+.vscode/
+
+# Mac OS
+.DS_Store
+
+# Jupyter output files and cache
+*.nbconvert.ipynb
+profile_default/
+ipython_config.py
+*.sav
+*.pkl
+*.joblib
+
+# Data files
+data/raw/
+data/processed/
+data/interim/
+data/external/
+
+# Model files
+models/
+checkpoints/
+*.h5
+*.ckpt
+*.pt
+*.onnx
+
+# Plot and figures
+figures/
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.pdf
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.out
+
+# HTML reports
+reports/*.html
+
+# Ignore files for security
+secrets/
+credentials.json
+token.json
+*.key
+*.pem
+
+# Ignore VSCode and other IDE-specific files
+.idea/
+*.iml
+*.code-workspace
+
+# Ignore __pycache__ in subfolders
+**/__pycache__/
