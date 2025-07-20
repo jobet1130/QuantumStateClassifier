@@ -55,8 +55,7 @@ jobs:
 
       - name: Install extras
         run: |
-          conda run -n quantum-ml
-          pip install papermill nbconvert
+          conda run -n quantum-ml pip install papermill nbconvert
 
       - name: Run notebooks with papermill
         run: |
