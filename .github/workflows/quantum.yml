@@ -38,8 +38,6 @@ jobs:
           git fetch pr
           git merge FETCH_HEAD --no-commit --no-ff || (echo "❌ Merge conflict detected!" && exit 1)
 
-
-
   build-and-test:
     name: Build & Test Notebooks
     runs-on: ubuntu-latest
@@ -91,7 +89,7 @@ jobs:
     name: Deploy to GitHub Pages
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     steps:
       - uses: actions/checkout@v4
 
@@ -117,5 +115,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
-
-
