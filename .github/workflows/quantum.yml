@@ -73,9 +73,13 @@ jobs:
 
       - name: Convert notebooks to HTML
         run: |
-          conda run quantum-ml
           mkdir -p artifacts_html
-          jupyter nbconvert --to html artifacts/*.ipynb --output-dir artifacts_html
+          if compgen -G "artifacts/*.ipynb" > /dev/null; then
+            echo "✅ Notebooks found. Converting to HTML..."
+            conda run -n quantum-ml jupyter nbconvert --to html artifacts/*.ipynb --output-dir artifacts_html
+          else
+            echo "⚠️ No notebooks found in artifacts/. Skipping conversion."
+          fi
 
       - name: Upload HTML Artifacts
         uses: actions/upload-artifact@v4
