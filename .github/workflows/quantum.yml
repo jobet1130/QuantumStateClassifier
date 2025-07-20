@@ -73,7 +73,7 @@ jobs:
 
       - name: Convert notebooks to HTML
         run: |
-          conda activate quantum-ml
+          conda run quantum-ml
           mkdir -p artifacts_html
           jupyter nbconvert --to html artifacts/*.ipynb --output-dir artifacts_html
 
