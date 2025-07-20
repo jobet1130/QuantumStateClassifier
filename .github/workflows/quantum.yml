@@ -89,20 +89,33 @@ jobs:
 
   deploy:
     name: Deploy to GitHub Pages
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     needs: build-and-test
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check for html-reports artifact
+        id: check-artifact
+        run: |
+          echo "Checking if html-reports artifact exists..."
+          response=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts)
+          echo "$response" | jq -r '.artifacts[].name' | grep -q '^html-reports$' && echo "found=true" >> $GITHUB_OUTPUT || echo "found=false" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Download Artifacts
+        if: steps.check-artifact.outputs.found == 'true'
         uses: actions/download-artifact@v4
         with:
           name: html-reports
           path: public
 
       - name: Deploy to GitHub Pages
+        if: steps.check-artifact.outputs.found == 'true'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
+
+
